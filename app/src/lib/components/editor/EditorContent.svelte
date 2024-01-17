@@ -1,11 +1,11 @@
 <script>
-
+	import TipTap from '../tiptap/TipTap.svelte';
 </script>
 
-<div class="w-full max-w-4xl h-full m-auto">
-
+<div class="m-auto h-full w-full max-w-4xl mt-24 mx-12">
+	<TipTap />
 </div>
 
 <style>
-    
+
 </style>

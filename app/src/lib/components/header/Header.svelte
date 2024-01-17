@@ -12,7 +12,7 @@
 	const profileRadioValue = 'benoit';
 </script>
 
-<div class="bg-secondary flex h-fit w-full place-content-between p-1">
+<div class="flex h-fit w-full place-content-between p-1">
 	<div class="flex h-full self-center">
 		<Badge class="mx-2 h-6 place-self-center">kinoscripter</Badge>
         <Menubar.Root>
@@ -105,7 +105,7 @@
             </Menubar.Menu>
           </Menubar.Root>
 	</div>
-	<div class="justify-self-end">
+	<div class="justify-self-end mr-2">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger asChild let:builder>
 				<Button builders={[builder]} variant="outline" size="icon">

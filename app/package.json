@@ -36,6 +36,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@tiptap/core": "^2.1.16",
+		"@tiptap/pm": "^2.1.16",
+		"@tiptap/starter-kit": "^2.1.16",
 		"bits-ui": "^0.14.0",
 		"clsx": "^2.1.0",
 		"mode-watcher": "^0.1.2",

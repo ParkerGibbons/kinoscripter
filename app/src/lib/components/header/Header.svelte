@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Sun, Moon } from 'radix-icons-svelte';
+	import { Sun, Moon, FileText } from 'radix-icons-svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Menubar from '$lib/components/ui/menubar';
+  import * as Sheet from '$lib/components/ui/sheet';
+  import * as Avatar from '$lib/components/ui/avatar';
 
 	import { setMode, resetMode } from 'mode-watcher';
 
@@ -14,6 +16,19 @@
 
 <div class="flex h-fit w-full place-content-between p-1">
 	<div class="flex h-full self-center">
+    <Sheet.Root>
+      <Sheet.Trigger>
+        <Button variant="outline" size="icon">
+          <FileText class="h-4 w-4" />
+        </Button>
+      </Sheet.Trigger>
+      <Sheet.Content side="left">
+        <Sheet.Header>
+          <Sheet.Title>your scripts</Sheet.Title>
+          <Sheet.Description>pick a script! any script!</Sheet.Description>
+        </Sheet.Header>
+      </Sheet.Content>
+    </Sheet.Root>
 		<Badge class="mx-2 h-6 place-self-center">kinoscripter</Badge>
         <Menubar.Root>
             <Menubar.Menu>
@@ -105,7 +120,12 @@
             </Menubar.Menu>
           </Menubar.Root>
 	</div>
-	<div class="justify-self-end mr-2">
+	<div class="flex justify-self-end mr-2 gap-2 items-center">
+    <div>
+      <Avatar.Root class="w-8 h-8">
+        <Avatar.Fallback>PG</Avatar.Fallback>
+      </Avatar.Root>
+    </div>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger asChild let:builder>
 				<Button builders={[builder]} variant="outline" size="icon">

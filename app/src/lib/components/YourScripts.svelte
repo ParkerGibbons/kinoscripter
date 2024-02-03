@@ -5,12 +5,13 @@
 	import { FileText } from 'radix-icons-svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { crossfade } from 'svelte/transition';
+	import Separator from './ui/separator/separator.svelte';
 
 	let className: string | undefined | null = undefined;
 	export let scripts: { name: string; href: string }[] = [
-		{ name: 'One Script', href: '' },
-		{ name: 'Another Script', href: '' },
-		{ name: 'Yet Another Script', href: '' }
+		{ name: 'Script 001', href: '/script/001' },
+		{ name: 'Script 002', href: '/script/002' },
+		{ name: 'Script 003', href: '/script/003' }
 	];
 	export { className as class };
 
@@ -27,18 +28,11 @@
 		<Button
 			href={script.href}
 			variant="ghost"
-			class={cn(!isActive && 'hover:underline', 'relative justify-start')}
+			class="flex justify-start w-full text-left"
 			data-svleltekit-noscroll
 		>
-			{#if isActive}
-				<div
-					class="bg-muted absolute inset-0 rounded-md"
-					in:send={{ key: 'active-sidebar-tab' }}
-					out:receive={{ key: 'active-sidebar-tab' }}
-				/>
-			{/if}
-            <FileText class="h-4 w-4 mr-2" />
-			<div class="relative">
+			<FileText class="mr-2 h-4 w-4" />
+			<div class="relative justify-start">
 				{script.name}
 			</div>
 		</Button>

@@ -2,15 +2,13 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Sun, Moon, FileText } from 'radix-icons-svelte';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as Menubar from '$lib/components/ui/menubar';
+	import { badgeVariants } from '$lib/components/ui/badge';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import * as Avatar from '$lib/components/ui/avatar';
-	import YourScripts from './YourScripts.svelte';
+	import YourScripts from '$lib/components/YourScripts.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import { supabase } from '$lib/supabaseClient';
 	import { setMode, resetMode } from 'mode-watcher';
-	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import DropdownMenuSeparator from '../ui/dropdown-menu/dropdown-menu-separator.svelte';
 
@@ -24,7 +22,9 @@
 	}
 </script>
 
-<div class="flex h-fit w-full place-content-between p-1 bg-secondary-foreground/10 backdrop-blur-sm shadow-md">
+<div
+	class="bg-secondary-foreground/10 flex h-fit w-full place-content-between p-1 shadow-md backdrop-blur-sm"
+>
 	<div class="flex h-full self-center">
 		<Sheet.Root>
 			<Sheet.Trigger>
@@ -36,15 +36,16 @@
 				<Sheet.Header>
 					<Sheet.Title>your scripts</Sheet.Title>
 					<Sheet.Description>pick a script! any script!</Sheet.Description>
-					<Button variant="secondary">
-						create new script
-					</Button>
+					<div class="grid grid-cols-2 gap-2">
+						<Button variant="outline" href="/editor" class="">text playground</Button>
+						<Button variant="default">new script</Button>
+					</div>
 					<Separator class="my-4" />
 					<YourScripts />
 				</Sheet.Header>
 			</Sheet.Content>
 		</Sheet.Root>
-		<Badge class="mx-2 h-6 place-self-center">kinoscripter</Badge>
+		<a href="/" class="{badgeVariants()} mx-2 h-6 place-self-center">kinoscripter</a>
 	</div>
 	<div class="mr-2 flex items-center gap-2 justify-self-end">
 		<div>

@@ -21,7 +21,7 @@
 </script>
 
 <svelte:head>
-	<title>User Management</title>
+	<title>kinoscripter</title>
 </svelte:head>
 
 <ModeWatcher />

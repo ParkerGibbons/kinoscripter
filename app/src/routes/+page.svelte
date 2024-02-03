@@ -8,14 +8,26 @@
 	import { Auth } from '@supabase/auth-ui-svelte';
 	import { ThemeSupa } from '@supabase/auth-ui-shared';
 
+	import Header from '$lib/components/header/Header.svelte';
+	import YourScripts from '$lib/components/YourScripts.svelte';
+
 	export let data;
+
+	export let scripts: { name: string; href: string }[] = [
+		{ name: 'Script 001', href: '/script/001' },
+		{ name: 'Script 002', href: '/script/002' },
+		{ name: 'Script 003', href: '/script/003' }
+	];
 </script>
 
 <svelte:head>
 	<title>kinoscripter home</title>
 </svelte:head>
 
-<div class="w-full h-dvh	 grid place-items-center">
+<div class="fixed w-full">
+	<Header />
+</div>
+<div class="h-dvh grid w-full place-items-center">
 	<div class="card">
 		<Card.Root class="w-[400px]">
 			<Card.Header>
@@ -25,9 +37,7 @@
 				>
 			</Card.Header>
 			<Card.Content class="flex flex-col gap-1">
-				<Button variant="ghost" size="sm" href="/editor">One Script</Button>
-				<Button variant="ghost" size="sm" href="/editor">Two Script</Button>
-				<Button variant="ghost" size="sm" href="/editor">Three Script</Button>
+				<YourScripts />
 			</Card.Content>
 		</Card.Root>
 	</div>

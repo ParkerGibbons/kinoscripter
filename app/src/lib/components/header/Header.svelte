@@ -6,10 +6,12 @@
 	import * as Menubar from '$lib/components/ui/menubar';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import * as Avatar from '$lib/components/ui/avatar';
+	import YourScripts from './YourScripts.svelte';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	import { setMode, resetMode } from 'mode-watcher';
 	import { redirect } from '@sveltejs/kit';
-  import { goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 
 	let bookmarks = false;
 	let fullUrls = true;
@@ -28,6 +30,11 @@
 				<Sheet.Header>
 					<Sheet.Title>your scripts</Sheet.Title>
 					<Sheet.Description>pick a script! any script!</Sheet.Description>
+					<Button variant="secondary">
+						create new script
+					</Button>
+					<Separator class="my-4" />
+					<YourScripts />
 				</Sheet.Header>
 			</Sheet.Content>
 		</Sheet.Root>

@@ -5,7 +5,7 @@
 	import { Editor } from '@tiptap/core';
 	import { onMount } from 'svelte';
 
-	import Button from '../ui/Button/Button.svelte';
+	import { Button } from "$lib/components/ui/button";
 	import Separator from '../ui/separator/separator.svelte';
 
 	let element;

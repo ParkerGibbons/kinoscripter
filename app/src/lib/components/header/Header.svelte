@@ -18,7 +18,7 @@
 	const profileRadioValue = 'benoit';
 </script>
 
-<div class="flex h-fit w-full place-content-between p-1">
+<div class="flex h-fit w-full place-content-between p-1 bg-secondary-foreground/10 backdrop-blur-sm shadow-md">
 	<div class="flex h-full self-center">
 		<Sheet.Root>
 			<Sheet.Trigger>

@@ -195,7 +195,7 @@
 	</div>
 {/if}
 <Separator class="my-4" />
-<div class="px-8 mx-auto prose dark:prose-invert" bind:this={element} />
+<div class="px-8 mx-auto prose prose-md dark:prose-invert" bind:this={element} />
 
 <style>
 	Button.active {

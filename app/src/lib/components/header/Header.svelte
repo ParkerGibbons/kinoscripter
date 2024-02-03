@@ -8,14 +8,20 @@
 	import * as Avatar from '$lib/components/ui/avatar';
 	import YourScripts from './YourScripts.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-
+	import { supabase } from '$lib/supabaseClient';
 	import { setMode, resetMode } from 'mode-watcher';
 	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
+	import DropdownMenuSeparator from '../ui/dropdown-menu/dropdown-menu-separator.svelte';
 
-	let bookmarks = false;
-	let fullUrls = true;
-	const profileRadioValue = 'benoit';
+	async function signOut() {
+		const { error } = await supabase.auth.signOut();
+		if (!error) {
+			goto('/login');
+		} else {
+			console.error('Sign out error', error.message);
+		}
+	}
 </script>
 
 <div class="flex h-fit w-full place-content-between p-1 bg-secondary-foreground/10 backdrop-blur-sm shadow-md">
@@ -39,93 +45,6 @@
 			</Sheet.Content>
 		</Sheet.Root>
 		<Badge class="mx-2 h-6 place-self-center">kinoscripter</Badge>
-		<Menubar.Root>
-			<Menubar.Menu>
-				<Menubar.Trigger>File</Menubar.Trigger>
-				<Menubar.Content>
-					<Menubar.Item>
-						New Tab <Menubar.Shortcut>⌘T</Menubar.Shortcut>
-					</Menubar.Item>
-					<Menubar.Item>
-						New Window <Menubar.Shortcut>⌘N</Menubar.Shortcut>
-					</Menubar.Item>
-					<Menubar.Item>New Incognito Window</Menubar.Item>
-					<Menubar.Separator />
-					<Menubar.Sub>
-						<Menubar.SubTrigger>Share</Menubar.SubTrigger>
-						<Menubar.SubContent>
-							<Menubar.Item>Email link</Menubar.Item>
-							<Menubar.Item>Messages</Menubar.Item>
-							<Menubar.Item>Notes</Menubar.Item>
-						</Menubar.SubContent>
-					</Menubar.Sub>
-					<Menubar.Separator />
-					<Menubar.Item>
-						Print... <Menubar.Shortcut>⌘P</Menubar.Shortcut>
-					</Menubar.Item>
-				</Menubar.Content>
-			</Menubar.Menu>
-			<Menubar.Menu>
-				<Menubar.Trigger>Edit</Menubar.Trigger>
-				<Menubar.Content>
-					<Menubar.Item>
-						Undo <Menubar.Shortcut>⌘Z</Menubar.Shortcut>
-					</Menubar.Item>
-					<Menubar.Item>
-						Redo <Menubar.Shortcut>⇧⌘Z</Menubar.Shortcut>
-					</Menubar.Item>
-					<Menubar.Separator />
-					<Menubar.Sub>
-						<Menubar.SubTrigger>Find</Menubar.SubTrigger>
-						<Menubar.SubContent>
-							<Menubar.Item>Search the web</Menubar.Item>
-							<Menubar.Separator />
-							<Menubar.Item>Find...</Menubar.Item>
-							<Menubar.Item>Find Next</Menubar.Item>
-							<Menubar.Item>Find Previous</Menubar.Item>
-						</Menubar.SubContent>
-					</Menubar.Sub>
-					<Menubar.Separator />
-					<Menubar.Item>Cut</Menubar.Item>
-					<Menubar.Item>Copy</Menubar.Item>
-					<Menubar.Item>Paste</Menubar.Item>
-				</Menubar.Content>
-			</Menubar.Menu>
-			<Menubar.Menu>
-				<Menubar.Trigger>View</Menubar.Trigger>
-				<Menubar.Content>
-					<Menubar.CheckboxItem bind:checked={bookmarks}
-						>Always Show Bookmarks Bar</Menubar.CheckboxItem
-					>
-					<Menubar.CheckboxItem bind:checked={fullUrls}>Always Show Full URLs</Menubar.CheckboxItem>
-					<Menubar.Separator />
-					<Menubar.Item inset>
-						Reload <Menubar.Shortcut>⌘R</Menubar.Shortcut>
-					</Menubar.Item>
-					<Menubar.Item inset>
-						Force Reload <Menubar.Shortcut>⇧⌘R</Menubar.Shortcut>
-					</Menubar.Item>
-					<Menubar.Separator />
-					<Menubar.Item inset>Toggle Fullscreen</Menubar.Item>
-					<Menubar.Separator />
-					<Menubar.Item inset>Hide Sidebar</Menubar.Item>
-				</Menubar.Content>
-			</Menubar.Menu>
-			<Menubar.Menu>
-				<Menubar.Trigger>Profiles</Menubar.Trigger>
-				<Menubar.Content>
-					<Menubar.RadioGroup value={profileRadioValue}>
-						<Menubar.RadioItem value="andy">Andy</Menubar.RadioItem>
-						<Menubar.RadioItem value="benoit">Benoit</Menubar.RadioItem>
-						<Menubar.RadioItem value="Luis">Luis</Menubar.RadioItem>
-					</Menubar.RadioGroup>
-					<Menubar.Separator />
-					<Menubar.Item inset>Edit...</Menubar.Item>
-					<Menubar.Separator />
-					<Menubar.Item inset>Add Profile...</Menubar.Item>
-				</Menubar.Content>
-			</Menubar.Menu>
-		</Menubar.Root>
 	</div>
 	<div class="mr-2 flex items-center gap-2 justify-self-end">
 		<div>
@@ -139,6 +58,8 @@
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end">
 					<DropdownMenu.Item on:click={() => goto('/account')}>Account</DropdownMenu.Item>
+					<DropdownMenuSeparator />
+					<DropdownMenu.Item on:click={signOut}>Sign out</DropdownMenu.Item>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</div>

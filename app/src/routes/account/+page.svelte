@@ -39,7 +39,7 @@
 
 <div class="form-widget">
 	<form
-		class="form-widget pt-24 px-60"
+		class="form-widget px-60 pt-24"
 		method="post"
 		action="?/update"
 		use:enhance={handleSubmit}

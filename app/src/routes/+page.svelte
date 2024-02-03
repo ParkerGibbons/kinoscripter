@@ -1,14 +1,24 @@
-<script>
-	import Header from '$lib/components/header/Header.svelte';
+<script lang="ts">
 	import EditorContent from '$lib/components/editor/EditorContent.svelte';
+
+	import { Auth } from '@supabase/auth-ui-svelte';
+	import { ThemeSupa } from '@supabase/auth-ui-shared';
+
+	export let data;
 </script>
 
-<div class="h-dvh">
-	<div class="fixed w-full">
-		<Header />
-	</div>
+<svelte:head>
+	<title>User Management</title>
+</svelte:head>
 
-	<div class="m-auto flex h-full w-full">
-		<EditorContent />
+<div class="row flex-center flex">
+	<div class="col-6 form-widget">
+		<Auth
+			supabaseClient={data.supabase}
+			view="magic_link"
+			redirectTo={`${data.url}/auth/callback`}
+			showLinks={false}
+			appearance={{ theme: ThemeSupa, style: { input: 'color: #fff' } }}
+		/>
 	</div>
 </div>

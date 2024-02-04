@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Header from '$lib/components/header/Header.svelte';
 	import EditorContent from '$lib/components/editor/EditorContent.svelte';
 
 	let scriptTitle = 'We Make Movies Better';
@@ -7,10 +6,6 @@
 </script>
 
 <div class="h-full w-full">
-	<div class="fixed w-full">
-		<Header />
-	</div>
-
 	<div class="mx-auto max-w-4xl pt-20">
 		<div class="flex flex-col gap-4">
 			<h1 class="text-5xl font-thin">{scriptTitle}</h1>

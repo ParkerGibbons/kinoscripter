@@ -4,13 +4,22 @@
 	import { Sun, Moon, FileText } from 'radix-icons-svelte';
 	import { badgeVariants } from '$lib/components/ui/badge';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import * as Avatar from '$lib/components/ui/avatar';
+	import UserAvatar from '$lib/components/UserAvatar.svelte';
+	import { userProfile } from '$lib/stores/userProfileStore';
 	import YourScripts from '$lib/components/YourScripts.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import { supabase } from '$lib/supabaseClient';
 	import { setMode, resetMode } from 'mode-watcher';
 	import { goto } from '$app/navigation';
 	import DropdownMenuSeparator from '../ui/dropdown-menu/dropdown-menu-separator.svelte';
+	import type { PageData } from '../../../routes/$types';
+
+	import { supabase } from '$lib/supabaseClient';
+	export let data: PageData;
+	let { session } = data;
+	$: ({ session } = data);
+
+	let avatarUrl: string = session?.user.user_metadata.avatar_url;
+	let fullName: string = session?.user.user_metadata.full_name;
 
 	async function signOut() {
 		const { error } = await supabase.auth.signOut();
@@ -51,11 +60,13 @@
 		<div>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger asChild let:builder>
-					<Button builders={[builder]} variant="ghost" size="icon">
-						<Avatar.Root class="h-8 w-8">
-							<Avatar.Fallback>PG</Avatar.Fallback>
-						</Avatar.Root>
-					</Button>
+					<div class="flex w-fit">
+						<Button builders={[builder]} variant="ghost" size="icon" class="w-12 h-12">
+							<div class="w-10 h-10">
+							<UserAvatar {avatarUrl} {fullName} />
+						</div>
+						</Button>
+					</div>
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end">
 					<DropdownMenu.Item on:click={() => goto('/account')}>Account</DropdownMenu.Item>

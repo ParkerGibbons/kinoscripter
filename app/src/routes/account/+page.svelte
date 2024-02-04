@@ -1,21 +1,24 @@
 <!-- src/routes/account/+page.svelte -->
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import Header from '$lib/components/header/Header.svelte';
+	import type { PageData } from "./$types";
+	import * as Card from '$lib/components/ui/card';
+	import { Button } from '$lib/components/ui/button';
+	import UserAvatar from '$lib/components/UserAvatar.svelte';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import AccountForm from './account-form.svelte';
 
-	export let data;
-	export let form;
+	export let data: PageData & { form?: any };
 
-	let { session, supabase, profile } = data;
-	$: ({ session, supabase, profile } = data);
+	let { session } = data;
+	$: ({ session, supabase } = data);
 
-	let profileForm: HTMLFormElement;
 	let loading = false;
-	let fullName: string = profile?.full_name ?? '';
-	let username: string = profile?.username ?? '';
-	let website: string = profile?.website ?? '';
-	let avatarUrl: string = profile?.avatar_url ?? '';
+	let fullName: string = session?.user.user_metadata.full_name;
+	let username: string = session?.user.user_metadata.username;
+	let website: string = session?.user.user_metadata.website;
+	let email: string = session?.user.user_metadata.email;
+	let avatarUrl: string = session?.user.user_metadata.avatar_url;
 
 	const handleSubmit: SubmitFunction = () => {
 		loading = true;
@@ -33,51 +36,28 @@
 	};
 </script>
 
-<div class="fixed w-full">
-	<Header />
-</div>
+<div class="h-dvh grid w-full place-items-center">
+	<Card.Root class="w-[400px] place-self-center">
+		<Card.Header>
+			<Card.Title>account</Card.Title>
+			<Card.Description>manage your account</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			<div class="flex flex-col gap-2">
+				<div class="flex items-center gap-2 rounded-md border p-2">
+					<UserAvatar {avatarUrl} {fullName} />
+					<div class="">
+						<p class="font-semibold">{fullName}</p>
+						<p class="text-sm text-gray-500">{email}</p>
+					</div>
+				</div>
+				<Button variant="secondary">change profile image</Button>
+			</div>
 
-<div class="form-widget">
-	<form
-		class="form-widget px-60 pt-24"
-		method="post"
-		action="?/update"
-		use:enhance={handleSubmit}
-		bind:this={profileForm}
-	>
-		<div>
-			<label for="email">Email</label>
-			<input id="email" type="text" value={session.user.email} disabled />
-		</div>
+			<Separator class="my-4" />
 
-		<div>
-			<label for="fullName">Full Name</label>
-			<input id="fullName" name="fullName" type="text" value={form?.fullName ?? fullName} />
-		</div>
+			<AccountForm form={data.form} data={data} />
 
-		<div>
-			<label for="username">Username</label>
-			<input id="username" name="username" type="text" value={form?.username ?? username} />
-		</div>
-
-		<div>
-			<label for="website">Website</label>
-			<input id="website" name="website" type="url" value={form?.website ?? website} />
-		</div>
-
-		<div>
-			<input
-				type="submit"
-				class="button primary block"
-				value={loading ? 'Loading...' : 'Update'}
-				disabled={loading}
-			/>
-		</div>
-	</form>
-
-	<form method="post" action="?/signout" use:enhance={handleSignOut}>
-		<div>
-			<button class="button block" disabled={loading}>Sign Out</button>
-		</div>
-	</form>
+		</Card.Content>
+	</Card.Root>
 </div>

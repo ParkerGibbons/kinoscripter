@@ -7,6 +7,7 @@
 	import type { PageData } from '../$types';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	let loading = false;
 
 	import { supabase } from '$lib/supabaseClient';
@@ -83,4 +84,8 @@
 	</div>
 </Form.Root>
 
-<Button on:click={handleSignOut} class="mt-1 w-full" variant="ghost">sign out</Button>
+<form method="post" action="/api/auth/signout" use:enhance>
+	<Button type="submit" on:click={handleSignOut} class="mt-1 w-full" variant="ghost"
+		>sign out</Button
+	>
+</form>

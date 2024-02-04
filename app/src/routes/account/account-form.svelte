@@ -1,14 +1,15 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
+	import { Button } from '$lib/components/ui/button';
 	import type { FormOptions } from 'formsnap';
 	import { formSchema, type FormSchema } from './schema';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { PageData } from '../$types';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	let loading = false;
 
 	import { supabase } from '$lib/supabaseClient';
-	import { Schema } from 'zod';
-
 	export let form: SuperValidated<FormSchema>;
 	export let data: PageData;
 
@@ -25,11 +26,16 @@
 	let { session } = data;
 	$: ({ session } = data);
 
-	let fullName: string = session?.user.user_metadata.full_name;
-	let username: string = session?.user.user_metadata.username;
-	let website: string = session?.user.user_metadata.website;
-	let email: string = session?.user.user_metadata.email;
-	let avatarUrl: string = session?.user.user_metadata.avatar_url;
+	let fullName: string = '';
+	let username: string = '';
+	let website: string = '';
+
+	onMount(async () => {
+		let { data: profiles, error } = await supabase.from('profiles').select('id');
+		fullName = session?.user.user_metadata.full_name;
+		username = session?.user.user_metadata.username;
+		website = session?.user.user_metadata.website;
+	});
 
 	async function handleSubmit() {
 		loading = true;
@@ -40,10 +46,14 @@
 
 	async function handleSignOut() {
 		loading = true;
-		return async ({ update }: { update: () => void }) => {
-			loading = false;
-			update();
-		};
+		let { error } = await supabase.auth.signOut();
+		loading = false;
+		if (!error) {
+			goto('/login');
+		} else {
+			console.error('Sign out error:', error.message);
+			// Handle the error appropriately
+		}
 	}
 </script>
 
@@ -69,6 +79,8 @@
 		</Form.Field>
 	</div>
 	<div class="pt-4">
-		<Form.Button disabled={loading} class="w-full">{loading ? 'Loading...' : 'Update'}</Form.Button>
+		<Form.Button disabled={loading} class="w-full">{loading ? 'Loading...' : 'update'}</Form.Button>
 	</div>
 </Form.Root>
+
+<Button on:click={handleSignOut} class="mt-1 w-full" variant="ghost">sign out</Button>

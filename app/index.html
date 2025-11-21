@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KinoScripter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+              script: ['Courier Prime', 'monospace'],
+            },
+            colors: {
+              paper: '#FFFCF0', 
+              ink: '#100F0F',
+              // Flexoki Palette mapping to Stone (Warm Grays)
+              stone: {
+                50: '#F2F0E5',
+                100: '#E6E4D9',
+                200: '#DAD8CE',
+                300: '#CECDC3',
+                400: '#B7B5AC',
+                500: '#878580',
+                600: '#6F6E69',
+                700: '#575653',
+                800: '#403E3C',
+                900: '#282726',
+                950: '#100F0F',
+              },
+              // Flexoki Accents
+              fx: {
+                red: '#AF3029',
+                orange: '#BC5215',
+                yellow: '#AD8301',
+                green: '#66800B',
+                cyan: '#24837B',
+                blue: '#205EA6',
+                purple: '#5E409D',
+                magenta: '#A02F6F',
+              }
+            },
+            backgroundImage: {
+              'grain': "url('https://grainy-gradients.vercel.app/noise.svg')",
+            },
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --border-light: rgba(0,0,0,0.1);
+        --border-dark: rgba(255,255,255,0.1);
+        --bg-card-light: #FFFCF0;
+        --bg-card-dark: #1C1B1A;
+      }
+
+      body {
+        background-color: #FFFCF0;
+        color: #100F0F;
+      }
+      
+      .dark body {
+        background-color: #100F0F;
+        color: #CECDC3;
+      }
+
+      /* Selection */
+      ::selection {
+        background-color: #E6E4D9; /* Stone 100 */
+        color: #100F0F;
+      }
+      .dark ::selection {
+        background-color: #403E3C; /* Stone 800 */
+        color: #F2F0E5;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #DAD8CE; border-radius: 3px; }
+      .dark ::-webkit-scrollbar-thumb { background: #282726; }
+      ::-webkit-scrollbar-thumb:hover { background: #CECDC3; }
+      .dark ::-webkit-scrollbar-thumb:hover { background: #403E3C; }
+
+      /* --- Rich Text & Resources --- */
+
+      .checklist-item {
+         display: inline-flex;
+         align-items: center;
+         vertical-align: middle;
+         margin-right: 6px;
+         user-select: none;
+      }
+
+      /* Markdown Styles */
+      .rich-text-editor h1 { font-size: 1.5em; font-weight: 800; margin-top: 0.75em; margin-bottom: 0.5em; line-height: 1.2; }
+      .rich-text-editor h2 { font-size: 1.25em; font-weight: 700; margin-top: 0.75em; margin-bottom: 0.5em; }
+      .rich-text-editor h3 { font-size: 1.1em; font-weight: 600; margin-top: 0.5em; margin-bottom: 0.25em; }
+      .rich-text-editor blockquote { border-left: 3px solid #E6E4D9; padding-left: 1rem; margin: 0.5rem 0; font-style: italic; color: #6F6E69; }
+      .dark .rich-text-editor blockquote { border-left-color: #403E3C; color: #878580; }
+      .rich-text-editor ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+      .rich-text-editor ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+      .rich-text-editor code { background-color: rgba(0,0,0,0.05); border-radius: 3px; padding: 0.1em 0.3em; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; color: #A02F6F; }
+      .dark .rich-text-editor code { background-color: rgba(255,255,255,0.1); color: #CE5D97; }
+      .rich-text-editor pre { background-color: #F2F0E5; padding: 0.5rem; border-radius: 0.375rem; font-family: 'JetBrains Mono', monospace; overflow-x: auto; margin: 0.5rem 0; }
+      .dark .rich-text-editor pre { background-color: #1C1B1A; }
+
+      /* Todo / Checklist Item - Custom Styling */
+      .todo-item {
+        display: flex;
+        align-items: flex-start;
+        margin: 4px 0;
+        gap: 8px;
+        padding: 2px 0;
+      }
+      
+      /* The checkbox input */
+      .todo-item input[type="checkbox"] {
+        appearance: none;
+        background-color: transparent;
+        margin: 0;
+        margin-top: 0.25em; /* Align with text baseline */
+        font: inherit;
+        color: currentColor;
+        width: 1.15em;
+        height: 1.15em;
+        border: 1.5px solid currentColor;
+        border-radius: 4px;
+        display: grid;
+        place-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        opacity: 0.4;
+        transition: all 0.2s ease;
+      }
+
+      .todo-item input[type="checkbox"]::before {
+        content: "";
+        width: 0.65em;
+        height: 0.65em;
+        transform: scale(0);
+        transition: 120ms transform ease-in-out;
+        box-shadow: inset 1em 1em currentColor;
+        transform-origin: center;
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      }
+
+      .todo-item input[type="checkbox"]:hover {
+          opacity: 0.8;
+          background-color: rgba(0,0,0,0.05);
+      }
+      .dark .todo-item input[type="checkbox"]:hover {
+          background-color: rgba(255,255,255,0.1);
+      }
+
+      .todo-item input[type="checkbox"]:checked {
+        opacity: 1;
+        border-color: currentColor;
+        background-color: transparent;
+      }
+
+      .todo-item input[type="checkbox"]:checked::before {
+        transform: scale(1);
+      }
+
+      /* Styling when task is done */
+      .todo-item input[type="checkbox"]:checked + span {
+        text-decoration: line-through;
+        opacity: 0.5;
+      }
+
+      /* Styling for "In Progress" via data attribute on parent */
+      .todo-item[data-status="in-progress"] input[type="checkbox"] {
+         border-color: #BC5215; /* Orange */
+         color: #BC5215;
+         opacity: 1;
+      }
+      /* Create a "dash" or "dot" for in-progress instead of check */
+      .todo-item[data-status="in-progress"] input[type="checkbox"]::before {
+         clip-path: circle(40%);
+         transform: scale(1);
+         box-shadow: inset 1em 1em #BC5215;
+      }
+
+      /* Resource Chips */
+      .resource-chip {
+        --chip-color: #5E409D; /* Flexoki Purple Default */
+        
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle; /* Better alignment with text flow */
+        padding: 1px 6px; /* Reduced vertical padding for better fit */
+        border-radius: 5px;
+        font-size: 0.85em;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        margin: 0 2px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        line-height: 1;
+        
+        /* Use the variable for colors - High Contrast Text */
+        color: color-mix(in srgb, var(--chip-color), black 40%);
+        background-color: color-mix(in srgb, var(--chip-color), white 92%);
+        border-color: color-mix(in srgb, var(--chip-color), white 60%);
+        box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+      }
+      
+      .dark .resource-chip {
+        background-color: color-mix(in srgb, var(--chip-color), black 60%);
+        border-color: color-mix(in srgb, var(--chip-color), black 40%);
+        color: color-mix(in srgb, var(--chip-color), white 10%);
+        box-shadow: none;
+      }
+
+      .resource-chip:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        background-color: color-mix(in srgb, var(--chip-color), white 85%);
+        border-color: color-mix(in srgb, var(--chip-color), white 40%);
+      }
+      .dark .resource-chip:hover {
+        background-color: color-mix(in srgb, var(--chip-color), black 50%);
+        border-color: color-mix(in srgb, var(--chip-color), black 30%);
+      }
+
+      .resource-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.1em;
+        height: 1.1em;
+        margin-right: 4px;
+        opacity: 0.9;
+      }
+      
+      .resource-icon svg {
+          width: 100%;
+          height: 100%;
+          stroke-width: 2.5px;
+      }
+      
+      /* --- Drag & Drop Styles --- */
+      
+      .draggable-source {
+        opacity: 0.5;
+      }
+
+      .drop-target-active::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background-color: #6F6E69; /* Flexoki Stone 600 */
+        border-radius: 2px;
+        z-index: 50;
+        pointer-events: none;
+      }
+      
+      .grip-handle {
+        cursor: grab;
+      }
+      .grip-handle:active {
+        cursor: grabbing;
+      }
+      
+      /* Hide default number input arrows */
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+      
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "d3": "https://aistudiocdn.com/d3@^7.9.0",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

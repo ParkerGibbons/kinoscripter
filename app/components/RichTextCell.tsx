@@ -81,9 +81,17 @@ const ResourcePreviewTooltip: React.FC<{
                 <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{resource.label || 'Resource'}</span>
             </div>
             
-            {(resource.type === 'media' && resource.value && resource.value.startsWith('http')) && (
+            {(resource.type === 'media' && (resource.embeddedData || (resource.value && resource.value.startsWith('http')))) && (
                 <div className="rounded overflow-hidden mb-2 bg-stone-100 dark:bg-stone-800">
-                    <img src={resource.value} alt="Preview" className="w-full h-32 object-cover" onError={(e) => e.currentTarget.style.display = 'none'} />
+                    {resource.embeddedData && resource.mimeType ? (
+                        resource.mimeType.startsWith('image/') ? (
+                            <img src={`data:${resource.mimeType};base64,${resource.embeddedData}`} alt="Preview" className="w-full h-32 object-cover" />
+                        ) : resource.mimeType.startsWith('video/') ? (
+                            <video src={`data:${resource.mimeType};base64,${resource.embeddedData}`} className="w-full h-32 object-cover" muted />
+                        ) : null
+                    ) : (
+                        <img src={resource.value} alt="Preview" className="w-full h-32 object-cover" onError={(e) => e.currentTarget.style.display = 'none'} />
+                    )}
                 </div>
             )}
             

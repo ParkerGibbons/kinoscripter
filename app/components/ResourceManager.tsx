@@ -6,7 +6,8 @@ import {
   X, Plus, Trash2, Save, Sparkles, Search, 
   ChevronRight, ChevronDown, User, MapPin, Box, 
   FileText, Film, Globe, Network, Edit3, Tag,
-  LayoutGrid, MoreHorizontal, Filter, ImageIcon, Type
+  LayoutGrid, MoreHorizontal, Filter, ImageIcon, Type,
+  Upload, Download
 } from 'lucide-react';
 import { RichTextCell } from './RichTextCell';
 import { generateResourceProfile, generateImage } from '../services/geminiService';
@@ -71,6 +72,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({ resources, onA
   
   const modalRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [editBuffer, setEditBuffer] = useState<Resource | null>(null);
 
@@ -201,6 +203,59 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({ resources, onA
   const removeTag = (tag: string) => {
       if (!editBuffer) return;
       handleBufferChange('tags', (editBuffer.tags || []).filter(t => t !== tag));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !editBuffer) return;
+
+      // Validate file type
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      if (!isImage && !isVideo) {
+          alert('Please select an image or video file');
+          return;
+      }
+
+      // Validate file size (5MB for images, 10MB for videos)
+      const maxSize = isImage ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+          alert(`File size exceeds limit (${isImage ? '5MB' : '10MB'})`);
+          return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = (event) => {
+          if (event.target?.result) {
+              const base64 = (event.target.result as string).split(',')[1]; // Remove data:type;base64, prefix
+              handleBufferChange('embeddedData', base64);
+              handleBufferChange('mimeType', file.type);
+              // Update value to show filename if no URL is present
+              if (!editBuffer.value || editBuffer.value.startsWith('http')) {
+                  handleBufferChange('value', file.name);
+              }
+          }
+      };
+      reader.readAsDataURL(file);
+
+      // Reset file input
+      if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+      }
+  };
+
+  const handleRemoveEmbeddedMedia = () => {
+      if (!editBuffer) return;
+      handleBufferChange('embeddedData', undefined);
+      handleBufferChange('mimeType', undefined);
+  };
+
+  const getMediaDataUrl = (resource: Resource): string | null => {
+      if (resource.embeddedData && resource.mimeType) {
+          return `data:${resource.mimeType};base64,${resource.embeddedData}`;
+      }
+      return null;
   };
 
   const filteredResources = useMemo(() => {
@@ -711,22 +766,94 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({ resources, onA
 
                                 {/* Value Field */}
                                 {(editBuffer.type === 'web' || editBuffer.type === 'media' || (editBuffer.value && editBuffer.value.startsWith('http'))) ? (
-                                     <div className="flex items-center gap-3 p-2.5 bg-stone-50 dark:bg-stone-900/40 rounded-lg border border-stone-200 dark:border-stone-800 max-w-2xl group/url focus-within:border-stone-300 dark:focus-within:border-stone-700 transition-colors">
-                                        <Globe size={14} className="text-stone-400 shrink-0 ml-1" />
-                                        <input 
-                                            className="flex-1 bg-transparent border-none p-0 text-xs font-mono text-blue-600 dark:text-blue-400 focus:ring-0 truncate"
-                                            value={editBuffer.value}
-                                            onChange={(e) => handleBufferChange('value', e.target.value)}
-                                            placeholder="https://..."
-                                        />
-                                        <a 
-                                            href={editBuffer.value} 
-                                            target="_blank" 
-                                            rel="noreferrer" 
-                                            className="text-[10px] font-bold uppercase text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 px-2"
-                                        >
-                                            Open
-                                        </a>
+                                     <div className="space-y-3 max-w-2xl">
+                                        {/* Embedded Media Preview */}
+                                        {editBuffer.type === 'media' && editBuffer.embeddedData && editBuffer.mimeType && (
+                                            <div className="relative group/media">
+                                                {editBuffer.mimeType.startsWith('image/') ? (
+                                                    <div className="relative rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900">
+                                                        <img 
+                                                            src={getMediaDataUrl(editBuffer)!} 
+                                                            alt={editBuffer.label || 'Media'} 
+                                                            className="w-full max-h-64 object-contain"
+                                                        />
+                                                        <button
+                                                            onClick={handleRemoveEmbeddedMedia}
+                                                            className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover/media:opacity-100 transition-opacity"
+                                                            title="Remove embedded media"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
+                                                ) : editBuffer.mimeType.startsWith('video/') ? (
+                                                    <div className="relative rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900">
+                                                        <video 
+                                                            src={getMediaDataUrl(editBuffer)!} 
+                                                            controls
+                                                            className="w-full max-h-64"
+                                                        />
+                                                        <button
+                                                            onClick={handleRemoveEmbeddedMedia}
+                                                            className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover/media:opacity-100 transition-opacity"
+                                                            title="Remove embedded media"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
+                                                ) : null}
+                                                <div className="text-[10px] text-stone-400 mt-1">
+                                                    Embedded media ({editBuffer.mimeType})
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {/* URL Input */}
+                                        <div className="flex items-center gap-3 p-2.5 bg-stone-50 dark:bg-stone-900/40 rounded-lg border border-stone-200 dark:border-stone-800 group/url focus-within:border-stone-300 dark:focus-within:border-stone-700 transition-colors">
+                                            <Globe size={14} className="text-stone-400 shrink-0 ml-1" />
+                                            <input 
+                                                className="flex-1 bg-transparent border-none p-0 text-xs font-mono text-blue-600 dark:text-blue-400 focus:ring-0 truncate"
+                                                value={editBuffer.value}
+                                                onChange={(e) => handleBufferChange('value', e.target.value)}
+                                                placeholder="https://..."
+                                            />
+                                            <a 
+                                                href={editBuffer.value} 
+                                                target="_blank" 
+                                                rel="noreferrer" 
+                                                className="text-[10px] font-bold uppercase text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 px-2"
+                                            >
+                                                Open
+                                            </a>
+                                        </div>
+
+                                        {/* Media Upload Button */}
+                                        {editBuffer.type === 'media' && (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*,video/*"
+                                                    onChange={handleFileUpload}
+                                                    className="hidden"
+                                                    id="media-upload-input"
+                                                />
+                                                <label
+                                                    htmlFor="media-upload-input"
+                                                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-lg border border-stone-200 dark:border-stone-700 cursor-pointer transition-colors"
+                                                >
+                                                    <Upload size={14} />
+                                                    {editBuffer.embeddedData ? 'Replace Media' : 'Embed Media File'}
+                                                </label>
+                                                {editBuffer.embeddedData && (
+                                                    <button
+                                                        onClick={handleRemoveEmbeddedMedia}
+                                                        className="px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
+                                                    >
+                                                        Remove Embedded
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                      </div>
                                 ) : (
                                      editBuffer.type !== 'note' && (

@@ -235,6 +235,35 @@ export default function App() {
       localStorage.setItem('kino-theme', 'light');
     }
   }, [darkMode]);
+
+  // Handle URL parameters for file loading
+  useEffect(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileParam = urlParams.get('file');
+      const filepathParam = urlParams.get('filepath');
+
+      // If file parameter exists (base64-encoded JSON)
+      if (fileParam) {
+          try {
+              const decoded = decodeURIComponent(fileParam);
+              const parsed = JSON.parse(atob(decoded));
+              loadScriptFromData(parsed);
+              // Clean up URL
+              window.history.replaceState({}, '', window.location.pathname);
+          } catch (err) {
+              console.error("Failed to load script from URL parameter:", err);
+          }
+      }
+      // If filepath parameter exists, try File System Access API
+      else if (filepathParam) {
+          // Note: File System Access API doesn't support opening files by path directly
+          // This would require a different approach or user interaction
+          // For now, we'll just trigger the file picker
+          loadScriptFromFileSystem();
+          // Clean up URL
+          window.history.replaceState({}, '', window.location.pathname);
+      }
+  }, []); // Run once on mount
   
   // Adjust title height
   useEffect(() => {
@@ -377,6 +406,35 @@ export default function App() {
     downloadAnchorNode.remove();
   };
 
+  // Helper function to load script from parsed JSON
+  const loadScriptFromData = (parsed: any) => {
+      try {
+          if (!parsed.content) throw new Error("Invalid structure");
+          if (!parsed.history) parsed.history = [];
+          if (!parsed.resources) parsed.resources = [];
+          if (parsed.history.length === 0) {
+               parsed.history = [{
+                   id: 'v-init-loaded',
+                   label: 'Version 1',
+                   timestamp: new Date().toISOString(),
+                   stats: getScriptStats(parsed),
+                   data: {
+                       content: JSON.parse(JSON.stringify(parsed.content)),
+                       resources: JSON.parse(JSON.stringify(parsed.resources)),
+                       metadata: { ...parsed.metadata }
+                   }
+               }];
+          }
+          setScript(parsed);
+          setShowFileMenu(false);
+          return true;
+      } catch (err) {
+          console.error("Failed to load script:", err);
+          alert("Invalid Kinoscript file");
+          return false;
+      }
+  };
+
   const loadScript = (e: React.ChangeEvent<HTMLInputElement>) => {
       const fileReader = new FileReader();
       if (e.target.files && e.target.files[0]) {
@@ -385,29 +443,64 @@ export default function App() {
               if(event.target?.result) {
                   try {
                       const parsed = JSON.parse(event.target.result as string);
-                      if (!parsed.content) throw new Error("Invalid structure");
-                      if (!parsed.history) parsed.history = [];
-                      if (!parsed.resources) parsed.resources = [];
-                      if (parsed.history.length === 0) {
-                           parsed.history = [{
-                               id: 'v-init-loaded',
-                               label: 'Version 1',
-                               timestamp: new Date().toISOString(),
-                               stats: getScriptStats(parsed),
-                               data: {
-                                   content: JSON.parse(JSON.stringify(parsed.content)),
-                                   resources: JSON.parse(JSON.stringify(parsed.resources)),
-                                   metadata: { ...parsed.metadata }
-                               }
-                           }];
-                      }
-                      setScript(parsed);
-                      setShowFileMenu(false);
+                      loadScriptFromData(parsed);
                   } catch (err) {
                       alert("Invalid Kinoscript file");
                   }
               }
           };
+      }
+  };
+
+  // Load script from File System Access API
+  const loadScriptFromFileSystem = async () => {
+      // Check if File System Access API is available
+      if (!('showOpenFilePicker' in window)) {
+          // Fallback: trigger file input
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = '.kinoscript,.json';
+          fileInput.onchange = (e) => {
+              const target = e.target as HTMLInputElement;
+              if (target.files && target.files[0]) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                      if (event.target?.result) {
+                          try {
+                              const parsed = JSON.parse(event.target.result as string);
+                              loadScriptFromData(parsed);
+                          } catch (err) {
+                              alert("Invalid Kinoscript file");
+                          }
+                      }
+                  };
+                  reader.readAsText(target.files[0], "UTF-8");
+              }
+          };
+          fileInput.click();
+          return;
+      }
+
+      try {
+          const [fileHandle] = await (window as any).showOpenFilePicker({
+              types: [{
+                  description: 'Kinoscript files',
+                  accept: {
+                      'application/json': ['.kinoscript', '.json']
+                  }
+              }],
+              multiple: false
+          });
+          
+          const file = await fileHandle.getFile();
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          loadScriptFromData(parsed);
+      } catch (err: any) {
+          // User cancelled or error occurred
+          if (err.name !== 'AbortError') {
+              console.error("Failed to open file:", err);
+          }
       }
   };
 

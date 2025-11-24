@@ -303,5 +303,20 @@
   <body>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
+  <script>
+    // Register protocol handler for kinoscript:// URLs
+    if ('registerProtocolHandler' in navigator) {
+      try {
+        navigator.registerProtocolHandler(
+          'kinoscript',
+          window.location.origin + window.location.pathname + '?file=%s',
+          'KinoScripter'
+        );
+      } catch (e) {
+        // Protocol handler registration may fail in some browsers or contexts
+        console.log('Protocol handler registration not available:', e);
+      }
+    }
+  </script>
 </body>
 </html>

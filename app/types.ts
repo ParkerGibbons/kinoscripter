@@ -26,6 +26,8 @@ export interface Resource {
   color?: string; // Hex code
   description?: string; // Rich text content for the resource wiki
   tags?: string[]; // New: Categorization tags
+  embeddedData?: string; // Base64-encoded media data
+  mimeType?: string; // MIME type (e.g., "image/png", "video/mp4")
 }
 
 export interface ScriptMetadata {
